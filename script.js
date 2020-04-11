@@ -8,6 +8,7 @@ This is will be the markup rules I will use to translate from the user input fie
 
 This Markdown is based on https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet
 
+
 -- H1
     Text ======= => <h1>Text</h1>
     #Text =><h1>Text</h1>
@@ -19,6 +20,8 @@ This Markdown is based on https://github.com/adam-p/markdown-here/wiki/Markdown-
     [Text](Link) => <a href= Link>Text</a>
 -- CODE
     ```Text``` => <code>Text</code>
+-- BLOCKQUOTE
+    >Text => <blockquote>Text</blockquote>
 -- PRE
     `Text` => <pre>Text</pre>
 -- P
@@ -45,13 +48,13 @@ Operation:
 -- Alters the markdown data and produces the html formatted version
 -- Returns the properly formatted html for rendering
 */
-markdownParse = (mdInput) =>{
+markdownParse = (mdInput) => {
     let md = mdInput
 
     //Ol
     md = md.replace(/^\s*\n\d\./gm, '<ol>\n1.');
     md = md.replace(/^(\d\..+)\s*\n([^\d\.])/gm, '$1\n</ol>\n\n$2');
-    md = md.replace(/^\d\.(.+)/gm, '<li>$1</li>');  
+    md = md.replace(/^\d\.(.+)/gm, '<li>$1</li>');
 
     //Ul
     md = md.replace(/^\s*\n\*/gm, '<ul>\n*');
@@ -92,12 +95,13 @@ markdownParse = (mdInput) =>{
     md = md.replace(/^\s*\n\`\`\`(([^\s+]))?/gm, '<pre class="$2">');
     md = md.replace(/^\`\`\`\s*\n/gm, '</pre>\n\n')
 
-    //Code
-    md= md.replace(/[\`]{1}([^\`]+)[\`]{1}/g, '<code>$1</code')
+    //Code (currently in conflict with pre)
+    md = md.replace(/[\`]{1}([^\`]+)[\`]{1}/g, '<code>$1</code')
 
     //P
-    //This one's annoying- the regex call starts by going through each line seperated by a /n and then has to skip of lines that are defined with the tags I accounted for
-    md= md.replace(/^\s*(\n)?(.+)/gm, (m)=>{return /\<(\/)?(h\d|ul|ol|li|blockquote|pre|img)/.test(m)? m:'<p>' + m + '</p>';})
+    //This one's annoying- the regex call starts by going through each line seperated by a /n 
+    //and then has to skip of lines that are defined with the tags I accounted for
+    md = md.replace(/^\s*(\n)?(.+)/gm, (m) => { return /\<(\/)?(h\d|ul|ol|li|blockquote|pre|img)/.test(m) ? m : '<p>' + m + '</p>'; })
 
     //Parsing p puts additional p tags in cases that aren't immediately attached to a tag, so need to parse out the addition <p>s
     md = md.replace(/(\<pre.+\>)\s*\n\<p\>(.+)\<\/>/gm, '$1$2')
